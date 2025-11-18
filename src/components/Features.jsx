@@ -1,13 +1,13 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Gauge, Zap, Cog, Brain, Seat } from 'lucide-react'
+import { Gauge, Zap, Cog, Brain, Car } from 'lucide-react'
 
 const featureList = [
   { icon: Gauge, title: 'Twin e-Motors', desc: 'Instant torque with vector control for razor-sharp handling.' },
   { icon: Zap, title: 'Solid-State Battery', desc: 'Ultra-fast charging and longer life with thermal stability.' },
   { icon: Cog, title: 'Active Aero', desc: 'Adaptive wings and shutters for optimal downforce and drag.' },
   { icon: Brain, title: 'AI Assist', desc: 'Predictive traction and route optimization using onboard AI.' },
-  { icon: Seat, title: 'Immersive Comfort', desc: 'Heated, cooled, and massaging seats with memory foam bolsters.' },
+  { icon: Car, title: 'Immersive Comfort', desc: 'Heated, cooled, and massaging seats with memory foam bolsters.' },
 ]
 
 const Features = () => {
