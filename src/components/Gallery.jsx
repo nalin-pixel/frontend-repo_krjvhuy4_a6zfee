@@ -1,5 +1,6 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useEffect } from 'react'
+import { motion, useInView } from 'framer-motion'
+import { useAngle } from './AngleContext'
 
 const images = [
   'https://images.unsplash.com/photo-1483721310020-03333e577078?q=80&w=1400&auto=format&fit=crop',
@@ -8,9 +9,18 @@ const images = [
   'https://images.unsplash.com/photo-1485291571150-772bcfc10da5?q=80&w=1400&auto=format&fit=crop',
 ]
 
+const AngleSetter = ({ target }) => {
+  const ref = React.useRef(null)
+  const inView = useInView(ref, { amount: 0.6 })
+  const { setAngle } = useAngle()
+  useEffect(() => { if (inView) setAngle(target) }, [inView, target, setAngle])
+  return <div ref={ref} />
+}
+
 const Gallery = () => {
   return (
     <section className="relative w-full bg-slate-950 py-20 text-white">
+      <AngleSetter target={120} />
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-8 text-center">
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">Cinematic Gallery</h2>
@@ -18,7 +28,7 @@ const Gallery = () => {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
-          {images.map((src, i) => (
+          {images.map((src) => (
             <motion.div key={src} whileHover={{ scale: 1.02 }} className="group relative aspect-[16/10] overflow-hidden rounded-3xl border border-slate-800">
               <img src={src} alt="car" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />

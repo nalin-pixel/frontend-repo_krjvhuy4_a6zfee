@@ -1,10 +1,20 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useEffect } from 'react'
+import { motion, useInView } from 'framer-motion'
 import Spline from '@splinetool/react-spline'
+import { useAngle } from './AngleContext'
+
+const AngleSetter = ({ target }) => {
+  const ref = React.useRef(null)
+  const inView = useInView(ref, { amount: 0.6 })
+  const { setAngle } = useAngle()
+  useEffect(() => { if (inView) setAngle(target) }, [inView, target, setAngle])
+  return <div ref={ref} />
+}
 
 const Hero3D = () => {
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-slate-950 text-white">
+      <AngleSetter target={0} />
       {/* Neon gradient glows */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />

@@ -4,11 +4,28 @@ import { motion } from 'framer-motion'
 const PricingBooking = () => {
   const [form, setForm] = useState({ name: '', email: '', date: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
+    setError('')
+    setLoading(true)
+    try {
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+      const res = await fetch(`${baseUrl}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      })
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+      setSubmitted(true)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -47,8 +64,9 @@ const PricingBooking = () => {
                 <input type="date" name="date" value={form.date} onChange={handleChange} required className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none ring-cyan-500/30 focus:ring" />
               </div>
             </div>
-            <button type="submit" className="mt-6 w-full rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 px-6 py-3 font-semibold shadow-[0_0_40px_rgba(56,189,248,0.35)]">Submit</button>
+            <button type="submit" disabled={loading} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 px-6 py-3 font-semibold shadow-[0_0_40px_rgba(56,189,248,0.35)] disabled:opacity-60">{loading ? 'Submitting...' : 'Submit'}</button>
             {submitted && <p className="mt-3 text-sm text-cyan-300">Thanks! We’ll be in touch shortly.</p>}
+            {error && <p className="mt-2 text-sm text-rose-400">{error}</p>}
           </motion.form>
         </div>
       </div>

@@ -1,5 +1,6 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useEffect } from 'react'
+import { motion, useInView } from 'framer-motion'
+import { useAngle } from './AngleContext'
 
 const hotspots = [
   { x: '30%', y: '38%', label: 'Ambient LED' },
@@ -7,9 +8,18 @@ const hotspots = [
   { x: '68%', y: '42%', label: 'Heads-up Display' },
 ]
 
+const AngleSetter = ({ target }) => {
+  const ref = React.useRef(null)
+  const inView = useInView(ref, { amount: 0.6 })
+  const { setAngle } = useAngle()
+  useEffect(() => { if (inView) setAngle(target) }, [inView, target, setAngle])
+  return <div ref={ref} />
+}
+
 const Interior = () => {
   return (
     <section className="relative w-full bg-slate-950 py-20 text-white">
+      <AngleSetter target={220} />
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-10 text-center">
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">Interior Experience</h2>

@@ -5,6 +5,7 @@ import App from './App'
 import Test from './Test'
 import './index.css'
 import ErrorBoundary from './components/ErrorBoundary'
+import { AngleProvider } from './components/AngleContext'
 
 function Fallback() {
   return (
@@ -24,12 +25,14 @@ function Fallback() {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary fallback={<Fallback />}> 
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/test" element={<Test />} />
-        </Routes>
-      </BrowserRouter>
+      <AngleProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/test" element={<Test />} />
+          </Routes>
+        </BrowserRouter>
+      </AngleProvider>
     </ErrorBoundary>
   </React.StrictMode>,
 )

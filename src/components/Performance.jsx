@@ -1,5 +1,14 @@
 import React, { useEffect } from 'react'
 import { motion, useAnimation, useInView } from 'framer-motion'
+import { useAngle } from './AngleContext'
+
+const AngleSetter = ({ target }) => {
+  const ref = React.useRef(null)
+  const inView = useInView(ref, { amount: 0.6 })
+  const { setAngle } = useAngle()
+  useEffect(() => { if (inView) setAngle(target) }, [inView, target, setAngle])
+  return <div ref={ref} />
+}
 
 const Gauge = ({ label, value, unit, delay = 0 }) => {
   const controls = useAnimation()
@@ -31,6 +40,7 @@ const Gauge = ({ label, value, unit, delay = 0 }) => {
 const Performance = () => {
   return (
     <section className="relative w-full bg-slate-950 py-20 text-white">
+      <AngleSetter target={45} />
       {/* Motion streaks */}
       <div className="pointer-events-none absolute inset-0 opacity-30 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]">
         <div className="absolute left-0 top-10 h-0.5 w-1/2 bg-gradient-to-r from-transparent via-cyan-400 to-transparent blur-[1px]" />

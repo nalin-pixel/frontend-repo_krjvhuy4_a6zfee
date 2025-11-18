@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Paintbrush, Sun, DoorOpen, RefreshCcw, Disc3 } from 'lucide-react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { Sun, DoorOpen, Disc3, RefreshCcw } from 'lucide-react'
+import { useAngle } from './AngleContext'
 
 const colors = [
   { name: 'Shadow Gray', class: 'from-slate-800 to-slate-700', body: '#2b2f36' },
@@ -14,17 +15,60 @@ const wheels = [
   { name: 'Chrome Edge', ring: 'bg-slate-300', spokes: 'bg-slate-400' },
 ]
 
+function useDragAngle(ref, setAngle) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    let dragging = false
+    let lastX = 0
+
+    function onDown(e) {
+      dragging = true
+      lastX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    }
+    function onMove(e) {
+      if (!dragging) return
+      const x = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const dx = x - lastX
+      lastX = x
+      setAngle(a => (a + dx * 0.6) % 360)
+    }
+    function onUp() { dragging = false }
+
+    el.addEventListener('mousedown', onDown)
+    el.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    el.addEventListener('touchstart', onDown, { passive: true })
+    el.addEventListener('touchmove', onMove, { passive: true })
+    window.addEventListener('touchend', onUp)
+
+    return () => {
+      el.removeEventListener('mousedown', onDown)
+      el.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+      el.removeEventListener('touchstart', onDown)
+      el.removeEventListener('touchmove', onMove)
+      window.removeEventListener('touchend', onUp)
+    }
+  }, [ref, setAngle])
+}
+
 const Viewer = () => {
   const [doorOpen, setDoorOpen] = useState(false)
   const [headlights, setHeadlights] = useState(true)
   const [colorIndex, setColorIndex] = useState(0)
   const [wheelIndex, setWheelIndex] = useState(0)
+  const containerRef = useRef(null)
+  const { angle, setAngle } = useAngle()
+
+  useDragAngle(containerRef, setAngle)
 
   const color = colors[colorIndex]
   const wheel = wheels[wheelIndex]
 
-  // Lightweight illustrative viewer using 2.5D card with interactive toggles.
-  // Provides smooth transitions while keeping performance high.
+  // Scroll-driven angles for different sections (used by other sections too if needed)
+  // For now, this section responds to drag; other sections can setAngle on enter.
 
   return (
     <section id="viewer" className="relative w-full bg-slate-950 py-20 text-white">
@@ -32,18 +76,21 @@ const Viewer = () => {
         <div className="mb-10 flex items-end justify-between">
           <div>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">Interactive Viewer</h2>
-            <p className="mt-2 text-slate-400">Rotate, toggle features, and style your Nova X.</p>
+            <p className="mt-2 text-slate-400">Drag to rotate 360°. Toggle features and style presets.</p>
           </div>
+          <button onClick={() => setAngle(0)} className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-slate-700/60 bg-slate-800/50 px-4 py-2 text-sm">
+            <RefreshCcw className="h-4 w-4" /> Reset Angle
+          </button>
         </div>
 
         <div className="grid gap-8 md:grid-cols-[1.2fr_0.8fr]">
           {/* Car card */}
           <motion.div
-            className="relative aspect-[16/9] rounded-3xl border border-slate-800 bg-gradient-to-br p-6 shadow-2xl"
+            ref={containerRef}
+            className="relative aspect-[16/9] rounded-3xl border border-slate-800 bg-gradient-to-br p-6 shadow-2xl select-none"
             whileHover={{ rotateX: 3, rotateY: -3 }}
             transition={{ type: 'spring', stiffness: 120, damping: 20 }}
             style={{ transformStyle: 'preserve-3d' }}
-            animate={{ background: undefined }}
           >
             {/* Road */}
             <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(ellipse_at_center,rgba(14,165,233,0.15),rgba(2,6,23,0.6)_60%,rgba(2,6,23,1)_80%)]" />
@@ -57,7 +104,8 @@ const Viewer = () => {
               className={`relative mx-auto mt-8 h-52 w-[88%] rounded-[2.2rem] bg-gradient-to-br ${color.class} shadow-[inset_0_1px_8px_rgba(255,255,255,0.2),0_20px_60px_rgba(14,165,233,0.2)]`}
               style={{
                 filter: 'saturate(1.05) contrast(1.05)',
-                transform: 'translateZ(30px)'
+                transformStyle: 'preserve-3d',
+                transform: `translateZ(30px) rotateY(${angle}deg)`
               }}
             >
               {/* Cabin */}
@@ -126,6 +174,7 @@ const Viewer = () => {
             </div>
           </div>
         </div>
+        <p className="mt-3 text-xs text-slate-500">Tip: drag the car left/right to rotate. Use the reset to snap back.</p>
       </div>
     </section>
   )
